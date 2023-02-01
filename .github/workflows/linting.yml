@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r src/requirements.txt
       - name: Run Black
-        run: black --check src
+        run: black --check --exclude '.*/migrations/.*.py' src
       - name: Run Flake8
         run: flake8 -v src
       - name: Run isort
