@@ -1,0 +1,62 @@
+name: Testing
+on: push
+
+jobs:
+  run_tests:
+    name: Run Django Tests
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:15.1-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: github_actions
+        ports:
+          - 5432:5432
+        options: --mount type=tmpfs,destination=/var/lib/postgresql/data --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11.1
+      - name: Cache requirements
+        id: cache-requirements
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os}}-pip-
+      - name: Install dependencies
+        run: pip install -r clickstream/requirements.txt
+      - name: Run tests
+        run: python manage.py test --parallel -v 2
+        working-directory: clickstream
+        env:
+          DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/github_actions
+  mypy:
+    name: MyPy checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11.1
+      - name: Cache requirements
+        id: cache-requirements
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os}}-pip-
+      - name: Install dependencies
+        run: pip install -r clickstream/requirements.txt
+      - name: Run mypy
+        run: mypy .
+        working-directory: clickstream
