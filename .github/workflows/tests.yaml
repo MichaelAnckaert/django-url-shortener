@@ -31,10 +31,10 @@ jobs:
           restore-keys: |
             ${{ runner.os}}-pip-
       - name: Install dependencies
-        run: pip install -r clickstream/requirements.txt
+        run: pip install -r src/requirements.txt
       - name: Run tests
-        run: python manage.py test --parallel -v 2
-        working-directory: clickstream
+        run: python manage.py test -v 2
+        working-directory: src
         env:
           DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/github_actions
   mypy:
@@ -56,7 +56,7 @@ jobs:
           restore-keys: |
             ${{ runner.os}}-pip-
       - name: Install dependencies
-        run: pip install -r clickstream/requirements.txt
+        run: pip install -r src/requirements.txt
       - name: Run mypy
         run: mypy .
-        working-directory: clickstream
+        working-directory: src
